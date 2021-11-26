@@ -1,0 +1,16 @@
+[Install]
+WantedBy=multi-user.target
+
+[Unit]
+Description=Cardano Prometheus Monitor
+After=cardano-relay.service
+
+[Service]
+Type=simple
+ExecStart=/home/cardano/node/scripts/cardano-log.py
+Restart=always
+RestartSec=15s
+StandardOutput=append:/home/cardano/node/logs/node-metrics.log
+StandardError=append:/home/cardano/node/logs/node-metrics.log
+User=cardano
+Group=cardano
