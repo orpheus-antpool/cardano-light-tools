@@ -30,12 +30,12 @@ is defined for each metric individually. You can rearrange, add or remove metric
 
 The default metrics are listed below:
 
-- Leader: Number of slots that passed a successful leader check (if block producer)
-- Adopted: Number of blocks successfully forged during leader slots (but not necessarily adopted by the rest of the network)
-- Checked: Number of slots during which a leader check was performed
-- Missed: Number of slots during which a leader check was missed (e.g., because the node was busy with garbage collection)
-- Live: Amount of live memory (actual memory in use by live data and dead data generated since the last garbage collection)
-- Heap: Amount of allocated memory (reserved from the OS but not necessarily live)
-- Major #GC: Number of major garbage collections (needs to stay low as it may lead to missed slot leader checks)
+- Leader: Slots that passed a leader check (if block producer)
+- Adopted: Blocks successfully minted during leader slots (but not necessarily adopted by other nodes)
+- Checked: Slots during which a leader check was performed
+- Missed: Slots missed for various reasons (e.g., garbage collection)
+- Live: Memory in use by data generated since the last garbage collection
+- Heap: Memory reserved from the OS but not necessarily live
+- Major #GC: Number of major garbage collections (causes missed slot leader checks)
 - GC Wall: Total time spent in garbage collection (only relevant if using blocking GC).
 - Within 1s/3s: Percent of blocks likely to be fetched within 1s/3s (each slot is one second).
