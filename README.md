@@ -15,7 +15,7 @@ Open `cardano-log.py` and change the following parameters if necessary:
 - CARDANO_NODE_PORT: listening port of Prometheus (default: 12798)
 - QUERY_INTERVAL: how often to query Prometheus (default: 10 seconds)
 
-Copy `cardano-log.service` to `/etc/system/system`. Edit `cardano-log.service` to specify the path to `cardano-log.py` and to the 
+Copy `cardano-log.service` to `/etc/systemd/system`. Edit `cardano-log.service` to specify the path to `cardano-log.py` and to the 
 log file. It is recommended to run `cardano-node` as a separate user (default: User=cardano, Group=cardano). Change as necessary.
 Start `cardano-log.service` and enable it to run automatically during boot:
 
