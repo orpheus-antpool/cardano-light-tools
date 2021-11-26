@@ -38,4 +38,4 @@ The default metrics are listed below:
 - Heap: Amount of allocated memory (reserved from the OS but not necessarily live)
 - Major #GC: Number of major garbage collections (needs to stay low as it may lead to missed slot leader checks)
 - GC Wall: Total time spent in garbage collection (only relevant if using blocking GC).
-- Fetch 1s: Percent of blocks likely to be fetched within 1s (slot duration).
+- Within 1s/3s: Percent of blocks likely to be fetched within 1s/3s (each slot is one second).
