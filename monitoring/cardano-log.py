@@ -10,8 +10,7 @@ class Metric:
     def __init__(self, name, print_name, kind='normal', increment=0.0, initial=0.0):
         self.name = name
         self.print_name = print_name
-        self.value = initial
-        self.last_value = self.value
+        self.initial = initial
         self.increment = increment
         if kind == 'size':
             self.formatter = lambda x: "%.2f GiB" % (x / 2**30)
@@ -21,6 +20,9 @@ class Metric:
             self.formatter = lambda x: "%.2f%%" % (x * 100)
         else:
             self.formatter = lambda x: "%d" % int(x)
+
+    def reset(self):
+        self.value = self.last_value = self.initial
 
     def update(self, value):
         self.value = value
@@ -40,6 +42,10 @@ class PrometheusMetrics:
 
     def add_metric(self, metric):
         self.metrics[metric.name] = metric
+
+    def reset(self):
+        for metric in self.metrics.values():
+            metric.reset()
 
     def __str__(self):
         try:
@@ -79,6 +85,7 @@ if __name__ == "__main__":
                     pid = proc.pid
             if pid != None:
                 print("%s Node up, new pid %d" % (now, pid), flush=True)
+                prometheus.reset()
             else:
                 continue
         else:
