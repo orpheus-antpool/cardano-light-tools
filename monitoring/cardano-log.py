@@ -33,6 +33,7 @@ class Metric:
             return False
 
     def __str__(self):
+        self.last_value = self.value
         return "%s: %s" % (self.print_name, self.formatter(self.value))
 
 class PrometheusMetrics:
