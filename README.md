@@ -3,9 +3,25 @@
 <img src="image/logo.jpg" width="50%" height="50%" alt="Logo">
 This repository includes a set of lightweight tools to operate and maintain a Cardano Stake Pool.
 
+## Leaderlog
+
+*Motivation*: Currently, most SPOs obtain their block schedule by running the cncli tool on the BP node. However, cncli requires 
+an external tool to calculate the total active stake and the pool's active stake for a given epoch. While this can be done using 
+cardano-cli, it also requires significant memory and computational resources that many BP nodes cannot spare. This script provides
+an alternative solution based on [BlockFrost.io](https://blockfrost.io/) that eliminates the need to interact with cardano-cli
+and cardano-node, effectively reducing memory and computational resource utilization.
+
+To use it, create a free BlockFrost.io account and obtain an API key. Then, open `cncli-leaderlog.sh` and edit the user variables
+(BlockFrost API key, pool id, path to cncli, etc.). The script will automatically obtain the active stake, synchronize the cncli
+DB and calculate the leader log.
+
+If you want to integrate the leaderlog output with other tools (e.g., Guild Operator Tools), you can keep running this script on
+the BP node. However, you also have the freedom to keep track of the leaderlog on a completely different machine that does not
+need to have a working cardano-cli and cardano-node setup.
+
 ## Monitoring
 
-This is a simple monitoring script that logs relevant metrics directly into a text file in human-readable form.
+*Motivation*: This is a simple monitoring script that logs relevant metrics directly into a text file in human-readable form.
 It can be used as an portable alternative to Grafana and other specialized tools that require a more complex setup and
 consume more resources (CPU, memory).
 
