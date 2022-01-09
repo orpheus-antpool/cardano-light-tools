@@ -27,9 +27,12 @@ systemctl enable cardano-log
 Now you can check the log file to analyze the metrics. Each line begins with a timestamp, folowed by a list of all defined metrics.
 A new line is logged only if at least one of the metrics changed by a significant amount (called increment). The increment
 is defined for each metric individually. You can rearrange, add or remove metrics as desired in the `cardano-log.py` script.
+Metrics marked as separate will be displayed in a separate line and do not trigger the display of other metrics. This is useful
+for logging slowly changing metrics that are not relevant in the context (e.g. epoch number).
 
 The default metrics are listed below:
 
+- Epoch: Epoch number
 - Leader: Slots that passed a leader check (if block producer)
 - Adopted: Blocks successfully minted during leader slots (but not necessarily adopted by other nodes)
 - Checked: Slots during which a leader check was performed

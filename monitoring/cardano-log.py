@@ -4,14 +4,15 @@ CARDANO_NODE_HOST='localhost'
 CARDANO_NODE_PORT=12798
 QUERY_INTERVAL=10
 
-import requests, time, datetime, psutil
+import requests, time, datetime, psutil, textwrap
 
 class Metric:
-    def __init__(self, name, print_name, kind='normal', increment=0.0, initial=0.0):
+    def __init__(self, name, print_name, kind='normal', separate=False, increment=0.0, initial=0.0):
         self.name = name
         self.print_name = print_name
-        self.initial = initial
+        self.separate = separate
         self.increment = increment
+        self.initial = initial
         if kind == 'size':
             self.formatter = lambda x: "%.2f GiB" % (x / 2**30)
         elif kind == 'time':
@@ -49,26 +50,30 @@ class PrometheusMetrics:
             metric.reset()
 
     def __str__(self):
+        result = ""
         try:
             r = requests.post(self.url)
         except:
-            return ""
+            return result
         increment = False
         for line in r.text.splitlines():
             name, val = line.partition(' ')[::2]
-            if name in self.metrics:
-                increment = self.metrics[name].update(float(val)) or increment
+            if name in self.metrics and self.metrics[name].update(float(val)):
+                if self.metrics[name].separate:
+                    result += str(self.metrics[name]) + '\n'
+                else:
+                    increment = True
         if increment:
-            return ', '.join(str(metric) for metric in self.metrics.values())
-        else:
-            return ""
+            result += ', '.join(str(metric) for metric in self.metrics.values() if not metric.separate)
+        return result.rstrip()
 
 if __name__ == "__main__":
     pid = None
     prometheus = PrometheusMetrics(CARDANO_NODE_HOST, CARDANO_NODE_PORT)
+    prometheus.add_metric(Metric('cardano_node_metrics_epoch_int', 'Epoch', separate=True))
     prometheus.add_metric(Metric('cardano_node_metrics_Forge_forged_int', 'Leader'))
     prometheus.add_metric(Metric('cardano_node_metrics_Forge_adopted_int', 'Adopted'))
-    prometheus.add_metric(Metric('cardano_node_metrics_Forge_forge_about_to_lead_int', 'Checked', kind='normal', increment = float('inf')))
+    prometheus.add_metric(Metric('cardano_node_metrics_Forge_forge_about_to_lead_int', 'Checked', increment = float('inf')))
     prometheus.add_metric(Metric('cardano_node_metrics_slotsMissedNum_int', 'Missed'))
     prometheus.add_metric(Metric('cardano_node_metrics_blockfetchclient_blockdelay_cdfOne', 'Within 1s', kind='probability', increment = 0.05))
     prometheus.add_metric(Metric('cardano_node_metrics_blockfetchclient_blockdelay_cdfThree', 'Within 3s', kind='probability', increment = 0.05))
@@ -96,4 +101,4 @@ if __name__ == "__main__":
                 continue
         metrics_str = str(prometheus)
         if metrics_str != "":
-            print("%s %s" % (now, metrics_str), flush=True)
+            print(textwrap.indent(metrics_str, now + ' '), flush=True)
