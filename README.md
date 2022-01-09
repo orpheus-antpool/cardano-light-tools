@@ -1,5 +1,6 @@
 # cardano-light-tools
 
+<img src="image/logo.jpg" width="50%" height="50%" alt="Logo">
 This repository includes a set of lightweight tools to operate and maintain a Cardano Stake Pool.
 
 ## Monitoring
