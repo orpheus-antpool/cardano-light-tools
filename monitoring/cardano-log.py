@@ -7,17 +7,18 @@ QUERY_INTERVAL=10
 import requests, time, datetime, psutil, textwrap
 
 class Metric:
-    def __init__(self, name, print_name, kind='normal', separate=False, increment=0.0, initial=0.0):
+    def __init__(self, name, print_name, kind='normal', increment=0.0, initial=0.0, separate=False, visible=True):
         self.name = name
         self.print_name = print_name
-        self.separate = separate
         self.increment = increment
         self.initial = initial
+        self.separate = separate
+        self.visible = visible
         if kind == 'size':
             self.formatter = lambda x: "%.2f GiB" % (x / 2**30)
         elif kind == 'time':
             self.formatter = lambda x: "%d ms" % int(x)
-        elif kind == 'probability':
+        elif kind == 'percent':
             self.formatter = lambda x: "%.2f%%" % (x * 100)
         else:
             self.formatter = lambda x: "%d" % int(x)
@@ -36,6 +37,14 @@ class Metric:
     def __str__(self):
         self.last_value = self.value
         return "%s: %s" % (self.print_name, self.formatter(self.value))
+
+class FunctionalMetric(Metric):
+    def __init__(self, name, print_name, func, kind='normal', increment=0.0, initial=0.0, separate=False, visible=True):
+        self.func = func
+        Metric.__init__(self, name, print_name, kind, increment, initial, separate, visible)
+
+    def update(self):
+        return Metric.update(self, self.func())
 
 class PrometheusMetrics:
     def __init__(self, host, port):
@@ -58,13 +67,20 @@ class PrometheusMetrics:
         increment = False
         for line in r.text.splitlines():
             name, val = line.partition(' ')[::2]
-            if name in self.metrics and self.metrics[name].update(float(val)):
-                if self.metrics[name].separate:
-                    result += str(self.metrics[name]) + '\n'
+            metric = self.metrics.get(name)
+            if metric is not None and metric.update(float(val)) and metric.visible:
+                if metric.separate:
+                    result += str(metric) + '\n'
+                else:
+                    increment = True
+        for metric in self.metrics.values():
+            if isinstance(metric, FunctionalMetric) and metric.update() and metric.visible:
+                if metric.separate:
+                    result += str(metric) + '\n'
                 else:
                     increment = True
         if increment:
-            result += ', '.join(str(metric) for metric in self.metrics.values() if not metric.separate)
+            result += ', '.join(str(metric) for metric in self.metrics.values() if not metric.separate and metric.visible)
         return result.rstrip()
 
 if __name__ == "__main__":
@@ -73,14 +89,17 @@ if __name__ == "__main__":
     prometheus.add_metric(Metric('cardano_node_metrics_epoch_int', 'Epoch', separate=True))
     prometheus.add_metric(Metric('cardano_node_metrics_Forge_forged_int', 'Leader'))
     prometheus.add_metric(Metric('cardano_node_metrics_Forge_adopted_int', 'Adopted'))
-    prometheus.add_metric(Metric('cardano_node_metrics_Forge_forge_about_to_lead_int', 'Checked', increment = float('inf')))
-    prometheus.add_metric(Metric('cardano_node_metrics_slotsMissedNum_int', 'Missed'))
-    prometheus.add_metric(Metric('cardano_node_metrics_blockfetchclient_blockdelay_cdfOne', 'Within 1s', kind='probability', increment = 0.05))
-    prometheus.add_metric(Metric('cardano_node_metrics_blockfetchclient_blockdelay_cdfThree', 'Within 3s', kind='probability', increment = 0.05))
+    checked = Metric('cardano_node_metrics_Forge_forge_about_to_lead_int', 'Checked', increment = float('inf'), visible=False)
+    prometheus.add_metric(checked)
+    missed = Metric('cardano_node_metrics_slotsMissedNum_int', 'Missed', visible=False)
+    prometheus.add_metric(missed)
+    prometheus.add_metric(FunctionalMetric('functional_missed', 'Missed', lambda: missed.value / (checked.value + missed.value), kind='percent', increment=0.0001))
+    prometheus.add_metric(Metric('cardano_node_metrics_blockfetchclient_blockdelay_cdfOne', 'Within 1s', kind='percent', increment=0.05))
+    prometheus.add_metric(Metric('cardano_node_metrics_blockfetchclient_blockdelay_cdfThree', 'Within 3s', kind='percent', increment=0.05))
     prometheus.add_metric(Metric('cardano_node_metrics_RTS_gcLiveBytes_int', 'Live', kind='size', increment = 256 * 2**20))
     prometheus.add_metric(Metric('cardano_node_metrics_RTS_gcHeapBytes_int', 'Heap', kind='size', increment = 256 * 2**20))
     prometheus.add_metric(Metric('cardano_node_metrics_RTS_gcMajorNum_int', 'Major #GC'))
-    prometheus.add_metric(Metric('rts_gc_gc_wall_ms', 'GC Wall', kind='time', increment = float('inf')))
+    prometheus.add_metric(Metric('rts_gc_gc_wall_ms', 'GC Wall', kind='time', increment=float('inf')))
 
     while True:
         time.sleep(QUERY_INTERVAL)
