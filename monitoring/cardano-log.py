@@ -65,20 +65,20 @@ class PrometheusMetrics:
         except:
             return result
         increment = False
+        def update_result(metric):
+            nonlocal result, increment
+            if metric.separate:
+                result += str(metric) + '\n'
+            else:
+                increment = True
         for line in r.text.splitlines():
             name, val = line.partition(' ')[::2]
             metric = self.metrics.get(name)
             if metric is not None and metric.update(float(val)) and metric.visible:
-                if metric.separate:
-                    result += str(metric) + '\n'
-                else:
-                    increment = True
+                update_result(metric)
         for metric in self.metrics.values():
             if isinstance(metric, FunctionalMetric) and metric.update() and metric.visible:
-                if metric.separate:
-                    result += str(metric) + '\n'
-                else:
-                    increment = True
+                update_result(metric)
         if increment:
             result += ', '.join(str(metric) for metric in self.metrics.values() if not metric.separate and metric.visible)
         return result.rstrip()
