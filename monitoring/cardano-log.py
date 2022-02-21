@@ -93,7 +93,7 @@ if __name__ == "__main__":
     prometheus.add_metric(checked)
     missed = Metric('cardano_node_metrics_slotsMissedNum_int', 'Missed', visible=False)
     prometheus.add_metric(missed)
-    prometheus.add_metric(FunctionalMetric('functional_missed', 'Missed', lambda: missed.value / (checked.value + missed.value), kind='percent', increment=0.0001))
+    prometheus.add_metric(FunctionalMetric('functional_missed', 'Miss Rate', lambda: missed.value / (checked.value + missed.value), kind='percent', increment=0.0001))
     prometheus.add_metric(Metric('cardano_node_metrics_blockfetchclient_blockdelay_cdfOne', 'Within 1s', kind='percent', increment=0.05))
     prometheus.add_metric(Metric('cardano_node_metrics_blockfetchclient_blockdelay_cdfThree', 'Within 3s', kind='percent', increment=0.05))
     prometheus.add_metric(Metric('cardano_node_metrics_RTS_gcLiveBytes_int', 'Live', kind='size', increment = 256 * 2**20))
