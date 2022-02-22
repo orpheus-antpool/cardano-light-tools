@@ -59,6 +59,7 @@ The default metrics are listed below:
 - Missed (hidden): Slots missed for various reasons (e.g., garbage collection)
 - Miss Rate (functional): Percent of missed slots ((Missed * 100) / (Missed + Checked))
 - Within 1s/3s: Percent of blocks likely to be fetched within 1s/3s (each slot is one second).
+- CPU (functional): CPU utilization during last QUERY_INTERVAL
 - Live: Memory in use by data generated since the last garbage collection
 - Heap: Memory reserved from the OS but not necessarily live
 - Major #GC: Number of major garbage collections (causes missed slot leader checks)
