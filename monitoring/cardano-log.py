@@ -89,7 +89,7 @@ if __name__ == "__main__":
     prometheus.add_metric(Metric('cardano_node_metrics_epoch_int', 'Epoch', separate=True))
     prometheus.add_metric(Metric('cardano_node_metrics_Forge_forged_int', 'Leader'))
     prometheus.add_metric(Metric('cardano_node_metrics_Forge_adopted_int', 'Adopted'))
-    checked = Metric('cardano_node_metrics_Forge_forge_about_to_lead_int', 'Checked', increment = float('inf'), visible=False)
+    checked = Metric('cardano_node_metrics_Forge_forge_about_to_lead_int', 'Checked', increment = float('inf'), initial=1, visible=False)
     prometheus.add_metric(checked)
     missed = Metric('cardano_node_metrics_slotsMissedNum_int', 'Missed', visible=False)
     prometheus.add_metric(missed)
