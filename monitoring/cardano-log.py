@@ -96,7 +96,7 @@ if __name__ == "__main__":
     prometheus.add_metric(FunctionalMetric('functional_missed', 'Miss Rate', lambda: missed.value / (checked.value + missed.value), kind='percent', increment=0.0001))
     prometheus.add_metric(Metric('cardano_node_metrics_blockfetchclient_blockdelay_cdfOne', 'Within 1s', kind='percent', increment=0.05))
     prometheus.add_metric(Metric('cardano_node_metrics_blockfetchclient_blockdelay_cdfThree', 'Within 3s', kind='percent', increment=0.05))
-    prometheus.add_metric(FunctionalMetric('functional_cpu', 'CPU', lambda: psutil.cpu_percent() / 100, kind='percent', increment=10))
+    prometheus.add_metric(FunctionalMetric('functional_cpu', 'CPU', lambda: psutil.cpu_percent() / 100, kind='percent', increment=0.1))
     prometheus.add_metric(Metric('cardano_node_metrics_RTS_gcLiveBytes_int', 'Live', kind='size', increment = 256 * 2**20))
     prometheus.add_metric(Metric('cardano_node_metrics_RTS_gcHeapBytes_int', 'Heap', kind='size', increment = 256 * 2**20))
     prometheus.add_metric(Metric('cardano_node_metrics_RTS_gcMajorNum_int', 'Major #GC'))
